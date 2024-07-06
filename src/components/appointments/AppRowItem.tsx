@@ -4,7 +4,7 @@ import { Button, Modal, Form } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 interface AppRowItemProps {
  appointment: AppModel;
- deleteApp: (rowNumber: number) => void;
+ deleteApp: (id: number) => void;//changed
  updateApp: (rowNumber: number, updatedApp: Partial<AppModel>) => void;
 }
 const AppRowItem: React.FC<AppRowItemProps> = ({ appointment, deleteApp, updateApp }) => {
