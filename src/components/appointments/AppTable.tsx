@@ -4,15 +4,15 @@ import { AppModel } from '../../models/AppModel';
 import React from 'react';
 interface AppTableProps {
  appointments: AppModel[];
- deleteApp: (rowNumber: number) => void;
- updateApp: (rowNumber: number, updatedApp: Partial<AppModel>) => void;
+ deleteApp: (id: number) => void;
+ updateApp: (id: number, updatedApp: Partial<AppModel>) => void;
 }
 const AppTable: React.FC<AppTableProps> = ({ appointments, deleteApp, updateApp }) => {
  return (
 <Table striped bordered hover>
 <thead>
 <tr>
-<th scope="col">Appointment number:</th>
+<th scope="col">Appointment ID:</th>
 <th scope="col">Description</th>
 <th scope="col">Doctor</th>
 <th scope="col">Patient</th>
@@ -23,7 +23,7 @@ const AppTable: React.FC<AppTableProps> = ({ appointments, deleteApp, updateApp 
 <tbody>
        {appointments.map(appointment => (
 <AppRowItem
-           key={appointment.rowNumber}
+           key={appointment.id}
            appointment={appointment}
            deleteApp={deleteApp}
            updateApp={updateApp}
