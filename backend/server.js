@@ -59,6 +59,21 @@ const express = require('express');
       res.status(204).end();
     });
   });
+  // Update an appointment
+app.put('/appointments/:id', (req, res) => {
+  const rowNumber = parseInt(req.params.id, 10);
+  const { rowDescription, rowDoctor, rowDate, rowTime, rowPatient } = req.body;
+  const query = 'UPDATE appointments SET rowDescription = ?, rowDoctor = ?, rowDate = ?, rowTime = ?, rowPatient = ? WHERE rowNumber = ?';
+  const values = [rowDescription, rowDoctor, rowDate, rowTime, rowPatient, rowNumber];
+  connection.query(query, values, (err, results) => {
+    if (err) {
+      console.error('Error updating appointment:', err);
+      res.status(500).json({ error: 'Database error' });
+      return;
+    }
+    res.json({ rowNumber, rowDescription, rowDoctor, rowDate, rowTime, rowPatient });
+  });
+ });
   app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
   });

@@ -49,15 +49,15 @@ const NewAppForm: React.FC<NewAppFormProps> = ({ addApp }) => {
                     <Form.Group controlId="formDate">
                         <Form.Label>Date</Form.Label>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <DatePicker
-                                selected={date}
-                                onChange={(date: Date) => setDate(date)}
-                                dateFormat="yyyy-MM-dd"
-                                className="form-control"
-                                placeholderText="Select date"
-                                wrapperClassName="date-picker-wrapper"
-                                minDate={new Date()}
-                            />
+                        <DatePicker
+   selected={date}
+   onChange={(date: Date | null) => setDate(date)}
+   dateFormat="yyyy-MM-dd"
+   className="form-control"
+   placeholderText="Select date"
+   wrapperClassName="date-picker-wrapper"
+   minDate={new Date()}
+/>
                         </div>
                     </Form.Group>
                 </Col>
@@ -65,17 +65,17 @@ const NewAppForm: React.FC<NewAppFormProps> = ({ addApp }) => {
                     <Form.Group controlId="formTime">
                         <Form.Label>Time</Form.Label>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <DatePicker
-                                selected={time}
-                                onChange={(time: Date) => setTime(time)}
-                                showTimeSelect
-                                showTimeSelectOnly
-                                timeIntervals={15}
-                                timeCaption="Time"
-                                dateFormat="HH:mm"
-                                className="form-control"
-                                placeholderText="Select time"
-                            />
+                        <DatePicker
+   selected={time}
+   onChange={(time: Date | null) => setTime(time)}
+   showTimeSelect
+   showTimeSelectOnly
+   timeIntervals={15}
+   timeCaption="Time"
+   dateFormat="HH:mm"
+   className="form-control"
+   placeholderText="Select time"
+/>
                         </div>
                     </Form.Group>
                 </Col>
