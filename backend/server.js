@@ -10,7 +10,7 @@ const express = require('express');
   const connection = mysql.createConnection({
     host: 'localhost',   // Replace with your host
     user: 'root',        // Replace with your MySQL username
-    password: 'root', // Replace with your MySQL password
+    password: 'Hom@3368189', // Replace with your MySQL password
     database: 'node_db' // Replace with your database name
   });
   // Connect to the database
@@ -50,7 +50,7 @@ const express = require('express');
   // Delete an appointment
   app.delete('/appointments/:id', (req, res) => {
     const id = parseInt(req.params.id, 10);
-    connection.query('DELETE FROM appointments WHERE id = ?', [id], (err, results) => {
+    connection.query('DELETE FROM appointments WHERE rowNumber = ?', [id], (err, results) => {
       if (err) {
         console.error('Error deleting appointment:', err);
         res.status(500).json({ error: 'Database error' });
