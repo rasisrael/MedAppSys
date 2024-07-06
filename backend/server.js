@@ -10,7 +10,7 @@ const express = require('express');
   const connection = mysql.createConnection({
     host: 'localhost',   // Replace with your host
     user: 'root',        // Replace with your MySQL username
-    password: 'root', // Replace with your MySQL password
+    password: 'Hom@3368189', // Replace with your MySQL password
     database: 'node_db' // Replace with your database name
   });
   // Connect to the database
@@ -43,14 +43,14 @@ const express = require('express');
         res.status(500).json({ error: 'Database error' });
         return;
       }
-      const newEvent = { rowNumber: results.insertId, rowDescription, rowDoctor, rowDate, rowTime, rowPatient };
+      const newEvent = { id: results.insertId, rowDescription, rowDoctor, rowDate, rowTime, rowPatient };
       res.status(201).json(newEvent);
     });
   });
   // Delete an appointment
   app.delete('/appointments/:id', (req, res) => {
-    const rowNumber = parseInt(req.params.id, 10);
-    connection.query('DELETE FROM appointments WHERE rowNumber = ?', [rowNumber], (err, results) => {
+    const id = parseInt(req.params.id, 10);
+    connection.query('DELETE FROM appointments WHERE id = ?', [id], (err, results) => {
       if (err) {
         console.error('Error deleting appointment:', err);
         res.status(500).json({ error: 'Database error' });
@@ -61,17 +61,17 @@ const express = require('express');
   });
   // Update an appointment
 app.put('/appointments/:id', (req, res) => {
-  const rowNumber = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id, 10);
   const { rowDescription, rowDoctor, rowDate, rowTime, rowPatient } = req.body;
-  const query = 'UPDATE appointments SET rowDescription = ?, rowDoctor = ?, rowDate = ?, rowTime = ?, rowPatient = ? WHERE rowNumber = ?';
-  const values = [rowDescription, rowDoctor, rowDate, rowTime, rowPatient, rowNumber];
+  const query = 'UPDATE appointments SET rowDescription = ?, rowDoctor = ?, rowDate = ?, rowTime = ?, rowPatient = ? WHERE id = ?';
+  const values = [rowDescription, rowDoctor, rowDate, rowTime, rowPatient, id];
   connection.query(query, values, (err, results) => {
     if (err) {
       console.error('Error updating appointment:', err);
       res.status(500).json({ error: 'Database error' });
       return;
     }
-    res.json({ rowNumber, rowDescription, rowDoctor, rowDate, rowTime, rowPatient });
+    res.json({ id, rowDescription, rowDoctor, rowDate, rowTime, rowPatient });
   });
  });
   app.listen(PORT, () => {

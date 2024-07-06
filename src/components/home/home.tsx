@@ -43,10 +43,10 @@ const Home: React.FC = () => {
  };
  const deleteApp = async (deleteAppRowId: number) => {
    try {
-    const response= await fetch(`http://localhost:3000/appointments/${deleteAppId}`, {
+    const response= await fetch(`http://localhost:3000/appointments/${deleteAppRowId}`, {
        method: 'DELETE',
      });
-     setAppointments(appointments.filter(appointment => appointment.id !== deleteAppId));
+     setAppointments(appointments.filter(appointment => appointment.id !== deleteAppRowId));
    } catch (error) {
      console.error('Error deleting appointment:', error);
    }

@@ -5,10 +5,10 @@ import DatePicker from 'react-datepicker';
 interface AppRowItemProps {
  appointment: AppModel;
  deleteApp: (id: number) => void;//changed
- updateApp: (rowNumber: number, updatedApp: Partial<AppModel>) => void;
+ updateApp: (id: number, updatedApp: Partial<AppModel>) => void;
 }
 const AppRowItem: React.FC<AppRowItemProps> = ({ appointment, deleteApp, updateApp }) => {
-    const { rowNumber, rowDescription, rowDoctor, rowDate, rowTime, rowPatient } = appointment;
+    const { id, rowDescription, rowDoctor, rowDate, rowTime, rowPatient } = appointment;
     // Validate date and time
     const isValidDate = (d: Date) => !isNaN(d.getTime());
     const date = isValidDate(new Date(rowDate)) ? new Date(rowDate) : new Date();
@@ -21,15 +21,15 @@ const AppRowItem: React.FC<AppRowItemProps> = ({ appointment, deleteApp, updateA
     const [patient, setPatient] = useState(rowPatient);
     const handleClose = () => setShow(false);
     const handleShow = () => {
-        console.log('Opening modal for appointment:', rowNumber);
+        console.log('Opening modal for appointment:', id);
         setShow(true);
     };
     const handleSave = () => {
-        console.log('Saving changes for appointment:', rowNumber);
+        console.log('Saving changes for appointment:', id);
         if (description && doctor && datePicker && timePicker && patient) {
             const formattedDate = datePicker.toISOString().split('T')[0];
             const formattedTime = timePicker.toTimeString().split(' ')[0];
-            updateApp(rowNumber, {
+            updateApp(id, {
                 rowDescription: description,
                 rowDoctor: doctor,
                 rowDate: formattedDate,
@@ -42,14 +42,14 @@ const AppRowItem: React.FC<AppRowItemProps> = ({ appointment, deleteApp, updateA
     return (
  <>
  <tr>
- <th scope="row">{rowNumber}</th>
+ <th scope="row">{id}</th>
  <td>{rowDescription}</td>
  <td>{rowDoctor}</td>
  <td>{rowPatient}</td>
  <td>{date.toLocaleDateString()}</td>
  <td>{rowTime}</td>
  <td>
- <Button variant="danger" onClick={() => deleteApp(rowNumber)}>Delete</Button>
+ <Button variant="danger" onClick={() => deleteApp(id)}>Delete</Button>
  <Button variant="primary" onClick={handleShow}>Edit</Button>
  </td>
  </tr>
