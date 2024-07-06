@@ -1,79 +1,257 @@
 const express = require('express');
-  const bodyParser = require('body-parser');
-  const cors = require('cors');
-  const mysql = require('mysql2');
-  const app = express();
-  const PORT = 3000;
-  app.use(cors());
-  app.use(bodyParser.json());
-  // Create a connection to the database
-  const connection = mysql.createConnection({
-    host: 'localhost',   // Replace with your host
-    user: 'root',        // Replace with your MySQL username
-    password: 'Hom@3368189', // Replace with your MySQL password
-    database: 'node_db' // Replace with your database name
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const mysql = require('mysql2');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const session = require('express-session');
+
+
+
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (token == null) return res.sendStatus(401);
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
   });
-  // Connect to the database
-  connection.connect(err => {
-    if (err) {
-      console.error('Error connecting to the database:', err);
-      return;
-    }
-    console.log('Connected to the MySQL database.');
-  });
-  // Get all appointments
-  app.get('/appointments', (req, res) => {
-    connection.query('SELECT * FROM appointments', (err, results) => {
+ };
+
+
+
+
+const app = express();
+const PORT = 3000;
+const SECRET_KEY = 'your_secret_key';
+app.use(cors());
+app.use(bodyParser.json());
+app.use(session({
+  secret: SECRET_KEY,
+  resave: false,
+  saveUninitialized: true,
+}));
+// Create a connection to the database
+const connection = mysql.createConnection({
+  host: 'localhost', // Replace with your host
+  user: 'root', // Replace with your MySQL username
+  password: 'Hom@3368189', // Replace with your MySQL password
+  database: 'node_db2' // Replace with your database name
+});
+// Connect to the database
+connection.connect(err => {
+  if (err) {
+    console.error('Error connecting to the database:', err);
+    return;
+  }
+  console.log('Connected to the MySQL database.');
+});
+
+// Middleware to check if user is authenticated
+const authenticateJWT = (req, res, next) => {
+  const token = req.headers.authorization;
+  if (token) {
+    jwt.verify(token, SECRET_KEY, (err, user) => {
       if (err) {
-        console.error('Error fetching appointments:', err);
+        return res.sendStatus(403);
+      } req.user =
+        user;
+      next();
+    });
+  } else {
+    res.sendStatus(401);
+  }
+};
+// User Registration
+app.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
+  connection.query(query, [username, hashedPassword], (err, results) => {
+    if (err) {
+      console.error('Error registering user:', err);
+      res.status(500).json({ error: 'Database error' });
+      return;
+    } 
+    const userId = results.insertId;
+    const token = jwt.sign({ id: userId, username }, process.env.ACCESS_TOKEN_SECRET, {
+      expiresIn: '1h',
+    });
+
+    res.status(201).json({
+      message: 'User registered successfully' });
+});
+
+  });
+  // User Login
+  app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    const query = 'SELECT * FROM users WHERE username = ?';
+    connection.query(query, [username], async (err, results) => {
+      if (err) {
+        console.error('Error fetching user:', err);
         res.status(500).json({ error: 'Database error' });
         return;
+      } if (
+        results.length >
+        0) {
+        const user = results[0];
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        if (isValidPassword) {
+          const token = jwt.sign({ username: user.username }, SECRET_KEY, { expiresIn: '1h' });
+          req.session.user = user.username;
+          res.json({ token });
+        } else {
+          res.status(401).json({ error: 'Invalid password' });
+        }
+      } else {
+        res.status(401).json({ error: 'User not found' });
       }
-      res.json(results);
     });
+  });
+  
+  // Get all appointments for the logged-in user
+  app.get('/appointments', authenticateJWT, (req, res) => {
+    const username = req.user.username;
+    connection.query('SELECT * FROM appointments WHERE rowPatient = ?', [username],
+      (err, results) => {
+        if (err) {
+          console.error('Error fetching appointments:', err);
+          res.status(500).json({ error: 'Database error' });
+          return;
+        } res.json(results);
+      });
   });
   // Add a new appointment
-  app.post('/appointments', (req, res) => {
+  app.post('/appointments', authenticateJWT, (req, res) => {
     const { rowDescription, rowDoctor, rowDate, rowTime, rowPatient } = req.body;
-    const query = 'INSERT INTO appointments (rowDescription, rowDoctor, rowDate, rowTime, rowPatient) VALUES (?, ?, ?, ?, ?)';
-    const values = [rowDescription, rowDoctor, rowDate, rowTime, rowPatient];
-    connection.query(query, values, (err, results) => {
-      if (err) {
-        console.error('Error adding appointment:', err);
-        res.status(500).json({ error: 'Database error' });
-        return;
-      }
-      const newEvent = { id: results.insertId, rowDescription, rowDoctor, rowDate, rowTime, rowPatient };
-      res.status(201).json(newEvent);
-    });
+    const query = 'INSERT INTO appointments (rowDescription, rowDoctor, rowDate, rowTime,rowPatient) VALUES(?, ?, ?, ?, ?)';
+  const values = [rowDescription, rowDoctor, rowDate, rowTime, rowPatient];
+  connection.query(query, values, (err, results) => {
+    if (err) {
+      console.error('Error adding appointment:', err);
+      res.status(500).json({ error: 'Database error' });
+      return;
+    }
+    const newEvent = {
+      id: results.insertId, rowDescription, rowDoctor, rowDate, rowTime,
+      rowPatient
+    };
+    res.status(201).json(newEvent);
   });
-  // Delete an appointment
-  app.delete('/appointments/:id', (req, res) => {
-    const id = parseInt(req.params.id, 10);
-    connection.query('DELETE FROM appointments WHERE id = ?', [id], (err, results) => {
-      if (err) {
-        console.error('Error deleting appointment:', err);
-        res.status(500).json({ error: 'Database error' });
-        return;
-      }
-      res.status(204).end();
-    });
+});
+// Delete an appointment
+app.delete('/appointments/:id', authenticateJWT, (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  connection.query('DELETE FROM appointments WHERE id = ?', [id], (err, results) => {
+    if (err) {
+      console.error('Error deleting appointment:', err);
+      res.status(500).json({ error: 'Database error' });
+      return;
+    } res.status(204).end();
   });
-  // Update an appointment
-app.put('/appointments/:id', (req, res) => {
+});
+// Update an appointment
+app.put('/appointments/:id', authenticateJWT, (req, res) => {
   const id = parseInt(req.params.id, 10);
   const { rowDescription, rowDoctor, rowDate, rowTime, rowPatient } = req.body;
-  const query = 'UPDATE appointments SET rowDescription = ?, rowDoctor = ?, rowDate = ?, rowTime = ?, rowPatient = ? WHERE id = ?';
+  const query = 'UPDATE appointments SET rowDescription = ?, rowDoctor = ?, rowDate = ?,rowTime = ?, rowPatient = ? WHERE id = ?';
   const values = [rowDescription, rowDoctor, rowDate, rowTime, rowPatient, id];
   connection.query(query, values, (err, results) => {
     if (err) {
       console.error('Error updating appointment:', err);
       res.status(500).json({ error: 'Database error' });
       return;
-    }
-    res.json({ id, rowDescription, rowDoctor, rowDate, rowTime, rowPatient });
+    } res.json({ id, rowDescription, rowDoctor, rowDate, rowTime, rowPatient });
   });
- });
-  app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-  });
+});
+// Logout
+app.post('/logout', (req, res) => {
+  req.session.destroy();
+  res.status(200).json({ message: 'Logged out successfully' });
+});
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+
+// const express = require('express');
+//   const bodyParser = require('body-parser');
+//   const cors = require('cors');
+//   const mysql = require('mysql2');
+//   const app = express();
+//   const PORT = 3000;
+//   app.use(cors());
+//   app.use(bodyParser.json());
+//   // Create a connection to the database
+//   const connection = mysql.createConnection({
+//     host: 'localhost',   // Replace with your host
+//     user: 'root',        // Replace with your MySQL username
+//     password: 'Hom@3368189', // Replace with your MySQL password
+//     database: 'node_db' // Replace with your database name
+//   });
+//   // Connect to the database
+//   connection.connect(err => {
+//     if (err) {
+//       console.error('Error connecting to the database:', err);
+//       return;
+//     }
+//     console.log('Connected to the MySQL database.');
+//   });
+//   // Get all appointments
+//   app.get('/appointments', (req, res) => {
+//     connection.query('SELECT * FROM appointments', (err, results) => {
+//       if (err) {
+//         console.error('Error fetching appointments:', err);
+//         res.status(500).json({ error: 'Database error' });
+//         return;
+//       }
+//       res.json(results);
+//     });
+//   });
+//   // Add a new appointment
+//   app.post('/appointments', (req, res) => {
+//     const { rowDescription, rowDoctor, rowDate, rowTime, rowPatient } = req.body;
+//     const query = 'INSERT INTO appointments (rowDescription, rowDoctor, rowDate, rowTime, rowPatient) VALUES (?, ?, ?, ?, ?)';
+//     const values = [rowDescription, rowDoctor, rowDate, rowTime, rowPatient];
+//     connection.query(query, values, (err, results) => {
+//       if (err) {
+//         console.error('Error adding appointment:', err);
+//         res.status(500).json({ error: 'Database error' });
+//         return;
+//       }
+//       const newEvent = { id: results.insertId, rowDescription, rowDoctor, rowDate, rowTime, rowPatient };
+//       res.status(201).json(newEvent);
+//     });
+//   });
+//   // Delete an appointment
+//   app.delete('/appointments/:id', (req, res) => {
+//     const id = parseInt(req.params.id, 10);
+//     connection.query('DELETE FROM appointments WHERE id = ?', [id], (err, results) => {
+//       if (err) {
+//         console.error('Error deleting appointment:', err);
+//         res.status(500).json({ error: 'Database error' });
+//         return;
+//       }
+//       res.status(204).end();
+//     });
+//   });
+//   // Update an appointment
+// app.put('/appointments/:id', (req, res) => {
+//   const id = parseInt(req.params.id, 10);
+//   const { rowDescription, rowDoctor, rowDate, rowTime, rowPatient } = req.body;
+//   const query = 'UPDATE appointments SET rowDescription = ?, rowDoctor = ?, rowDate = ?, rowTime = ?, rowPatient = ? WHERE id = ?';
+//   const values = [rowDescription, rowDoctor, rowDate, rowTime, rowPatient, id];
+//   connection.query(query, values, (err, results) => {
+//     if (err) {
+//       console.error('Error updating appointment:', err);
+//       res.status(500).json({ error: 'Database error' });
+//       return;
+//     }
+//     res.json({ id, rowDescription, rowDoctor, rowDate, rowTime, rowPatient });
+//   });
+//  });
+//   app.listen(PORT, () => {
+//     console.log(`Server is running on http://localhost:${PORT}`);
+//   });
