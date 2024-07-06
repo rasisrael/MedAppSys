@@ -41,19 +41,19 @@ const Home: React.FC = () => {
      console.error('Error adding appointment:', error);
    }
  };
- const deleteApp = async (deleteAppRowNumber: number) => {
+ const deleteApp = async (deleteAppRowId: number) => {
    try {
-     await fetch(`http://localhost:3000/appointments/${deleteAppRowNumber}`, {
+    const response= await fetch(`http://localhost:3000/appointments/${deleteAppId}`, {
        method: 'DELETE',
      });
-     setAppointments(appointments.filter(appointment => appointment.rowNumber !== deleteAppRowNumber));
+     setAppointments(appointments.filter(appointment => appointment.id !== deleteAppId));
    } catch (error) {
      console.error('Error deleting appointment:', error);
    }
  };
- const updateApp = async (rowNumber: number, updatedApp: Partial<AppModel>) => {
+ const updateApp = async (id: number, updatedApp: Partial<AppModel>) => {
    try {
-     const response = await fetch(`http://localhost:3000/appointments/${rowNumber}`, {
+     const response = await fetch(`http://localhost:3000/appointments/${id}`, {
        method: 'PUT',
        headers: {
          'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ const Home: React.FC = () => {
        body: JSON.stringify(updatedApp),
      });
      const updatedAppointment: AppModel = await response.json();
-     setAppointments(appointments.map(app => (app.rowNumber === rowNumber ? updatedAppointment : app)));
+     setAppointments(appointments.map(app => (app.id === id ? updatedAppointment : app)));
    } catch (error) {
      console.error('Error updating appointment:', error);
    }
