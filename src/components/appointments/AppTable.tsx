@@ -5,7 +5,7 @@ import React from 'react';
 
 interface AppTableProps {
     appointments: AppModel[];
-    deleteApp: (rowNumber: number) => void;
+    deleteApp: (id: number) => void;
 }
 
 const AppTable: React.FC<AppTableProps> = ({ appointments, deleteApp }) => {
@@ -13,7 +13,7 @@ const AppTable: React.FC<AppTableProps> = ({ appointments, deleteApp }) => {
         <Table striped bordered hover>
             <thead>
             <tr>
-                <th scope="col">Appointment number:</th>
+                <th scope="col">Appointment ID</th>
                 <th scope="col">Description</th>
                 <th scope="col">Doctor</th>
                 <th scope="col">Patient</th>
@@ -24,7 +24,7 @@ const AppTable: React.FC<AppTableProps> = ({ appointments, deleteApp }) => {
             <tbody>
             {appointments.map(appointment => (
                 <AppRowItem
-                    key={appointment.rowNumber}
+                    key={appointment.id}
                     appointment={appointment}
                     deleteApp={deleteApp}
                 />

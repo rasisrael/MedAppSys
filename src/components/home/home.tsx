@@ -18,6 +18,7 @@ const Home: React.FC = () => {
         try {
             const response = await fetch('http://localhost:3000/appointments');
             const data: AppModel[] = await response.json();
+            console.log('Fetched appointments:', data); // Log fetched appointments
             setAppointments(data);
         } catch (error) {
             console.error('Error fetching appointments:', error);
@@ -46,12 +47,18 @@ const Home: React.FC = () => {
         }
     };
 
-    const deleteApp = async (deleteAppRowNumber: number) => {
+    const deleteApp = async (deleteAppId: number) => {
+        console.log('Deleting appointment with id:', deleteAppId);
         try {
-            await fetch(`http://localhost:3000/appointments/${deleteAppRowNumber}`, {
+            const response = await fetch(`http://localhost:3000/appointments/${deleteAppId}`, {
                 method: 'DELETE',
             });
-            setAppointments(appointments.filter(appointment => appointment.rowNumber !== deleteAppRowNumber));
+
+            if (response.ok) {
+                setAppointments(appointments.filter(appointment => appointment.id !== deleteAppId));
+            } else {
+                console.error('Failed to delete appointment, server responded with:', response.status);
+            }
         } catch (error) {
             console.error('Error deleting appointment:', error);
         }

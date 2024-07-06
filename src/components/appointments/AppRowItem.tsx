@@ -1,26 +1,27 @@
 import React from 'react';
 import { AppModel } from '../../models/AppModel';
-import {Button} from "react-bootstrap";
 
 interface AppRowItemProps {
     appointment: AppModel;
-    deleteApp: (rowNumber: number) => void;
+    deleteApp: (id: number) => void;
 }
 
 const AppRowItem: React.FC<AppRowItemProps> = ({ appointment, deleteApp }) => {
-    const { rowNumber, rowDescription, rowDoctor, rowDate, rowTime, rowPatient } = appointment; // Include the new field
-    const date = new Date(rowDate);
+    const handleDelete = () => {
+        console.log('Attempting to delete appointment with id:', appointment.id);
+        deleteApp(appointment.id);
+    };
 
     return (
         <tr>
-            <th scope="row">{rowNumber}</th>
-            <td>{rowDescription}</td>
-            <td>{rowDoctor}</td>
-            <td>{rowPatient}</td>
-            <td>{date.toLocaleDateString()}</td>
-            <td>{rowTime}</td>
+            <td>{appointment.id}</td>
+            <td>{appointment.rowDescription}</td>
+            <td>{appointment.rowDoctor}</td>
+            <td>{appointment.rowPatient}</td>
+            <td>{appointment.rowDate}</td>
+            <td>{appointment.rowTime}</td>
             <td>
-                <Button variant="danger" onClick={() => deleteApp(rowNumber)}>Delete</Button>
+                <button onClick={handleDelete}>Delete</button>
             </td>
         </tr>
     );

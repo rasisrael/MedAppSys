@@ -1,5 +1,5 @@
 export interface AppModel {
-    rowNumber: number;
+    id: number;
     rowDescription: string;
     rowDoctor: string;
     rowDate: string;
