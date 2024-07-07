@@ -12,26 +12,45 @@ const Home: React.FC = () => {
   }, []);
   const fetchAppointments = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/appointments', {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-
-          // Authorization: token ? token : '',
-        },
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data: AppModel[] = await response.json();
-      setAppointments(data);
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:3000/appointments', {
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data: AppModel[] = await response.json();
+        setAppointments(data);
     } catch (error) {
-      console.error('Error fetching appointments:', error);
+        console.error('Error fetching appointments:', error);
     }
-  };
+ };
+  // const fetchAppointments = async () => {
+  //   try {
+  //     const token = localStorage.getItem('token');
+  //     const response = await fetch('http://localhost:3000/appointments', {
+  //       credentials: 'include',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         Authorization: `Bearer ${token}`,
+
+  //         // Authorization: token ? token : '',
+  //       },
+  //     });
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //     }
+
+  //     const data: AppModel[] = await response.json();
+  //     setAppointments(data);
+  //   } catch (error) {
+  //     console.error('Error fetching appointments:', error);
+  //   }
+  // };
   const addAppointment = async (description: string, doctor: string, date: string, time: string,
     patient: string) => {
     try {
