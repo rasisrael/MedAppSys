@@ -71,24 +71,7 @@ app.post('/register', async (req, res) => {
       res.status(201).json({ message: 'User registered successfully' });
   });
 });
-// app.post('/register', async (req, res) => {
-// const { username, password } = req.body;
-// const hashedPassword = await bcrypt.hash(password, 10);
-// const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
-// connection.query(query, [username, hashedPassword], (err, results) => {
-//   if (err) {
-//    console.error('Error registering user:', err);
-//    res.status(500).json({ error: 'Database error' });
-//     return;
-//   }
-//   const userId = results.insertId;
-//   const token = jwt.sign({ id: userId, username }, SECRET_KEY, {
-//     expiresIn: '1h',
-//   });
-// res.status(201).json({
-//     message: 'User registered successfully' });
-// });
-// });
+
 // User Login
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
@@ -114,31 +97,7 @@ app.post('/login', (req, res) => {
       }
   });
 });
-// app.post('/login', (req, res) => {
-//   const { username, password } = req.body;
-//   const query = 'SELECT * FROM users WHERE username = ?';
-// connection.query(query, [username], async (err, results) => {
-//     if (err) {
-//      console.error('Error fetching user:', err);
-//      res.status(500).json({ error: 'Database error' });
-//       return;
-//     } if (
-//       results.length >
-//       0) {
-//       const user = results[0];
-//       const isValidPassword = await bcrypt.compare(password, user.password);
-//       if (isValidPassword) {
-//         const token = jwt.sign({ username: user.username }, SECRET_KEY, { expiresIn: '1h' });
-//         req.session.user = user.username;
-//         res.json({ token });
-//       } else {
-//        res.status(401).json({ error: 'Invalid password' });
-//       }
-//     } else {
-//      res.status(401).json({ error: 'User not found' });
-//     }
-//   });
-// });
+
 // Get all appointments for the logged-in user
 app.get('/appointments', authenticateJWT, (req, res) => {
   const { username, role } = req.user;
@@ -160,21 +119,12 @@ app.get('/appointments', authenticateJWT, (req, res) => {
       res.json(results);
   });
 });
-// app.get('/appointments', authenticateJWT, (req, res) => {
-//   const username = req.user.username;
-// connection.query('SELECT * FROM appointments WHERE rowPatient = ?', [username],
-//     (err, results) => {
-//       if (err) {
-//        console.error('Error fetching appointments:', err);
-//        res.status(500).json({ error: 'Database error' });
-//         return;
-//       } res.json(results);
-//     });
-// });
+
+
+
 // Add a new appointment
 app.post('/appointments', authenticateJWT, (req, res) => {
-  const { rowDescription, rowDoctor, rowDate, rowTime } = req.body;
-  const rowPatient = req.user.username;
+  const { rowDescription, rowDoctor, rowDate, rowTime, rowPatient } = req.body;
   const query = 'INSERT INTO appointments (rowDescription, rowDoctor, rowDate, rowTime, rowPatient) VALUES (?, ?, ?, ?, ?)';
   const values = [rowDescription, rowDoctor, rowDate, rowTime, rowPatient];
   connection.query(query, values, (err, results) => {
@@ -187,23 +137,9 @@ app.post('/appointments', authenticateJWT, (req, res) => {
       res.status(201).json(newEvent);
   });
 });
-// app.post('/appointments', authenticateJWT, (req, res) => {
-//   const { rowDescription, rowDoctor, rowDate, rowTime, rowPatient } = req.body;
-//   const query = 'INSERT INTO appointments (rowDescription, rowDoctor, rowDate, rowTime,rowPatient) VALUES(?, ?, ?, ?, ?)';
-// const values = [rowDescription, rowDoctor, rowDate, rowTime, rowPatient];
-// connection.query(query, values, (err, results) => {
-//   if (err) {
-//    console.error('Error adding appointment:', err);
-//    res.status(500).json({ error: 'Database error' });
-//     return;
-//   }
-//   const newEvent = {
-//     id: results.insertId, rowDescription, rowDoctor, rowDate, rowTime,
-//     rowPatient
-//   };
-// res.status(201).json(newEvent);
-// });
-// });
+
+
+
 // Delete an appointment
 app.delete('/appointments/:id', authenticateJWT, (req, res) => {
 const id = parseInt(req.params.id, 10);
@@ -237,7 +173,6 @@ res.status(200).json({ message: 'Logged out successfully' });
 app.listen(PORT, () => {
 console.log(`Server is running on http://localhost:${PORT}`);
 });
-// const express = require('express');
 //   const bodyParser = require('body-parser');
 //   const cors = require('cors');
 //   const mysql = require('mysql2');
