@@ -36,17 +36,17 @@ if (err) {
 }
 console.log('Connected to the MySQL database.');
 });
-// Middleware to check if user is authenticated
-const authenticateJWT = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (token) {
-    jwt.verify(token, SECRET_KEY, (err, user) => {
+// Middleware to check if user is authenticated  - all the functions have access to the request('req') and responses and the next middleware
+const authenticateJWT = (req, res, next) => {  
+  const token = req.headers.authorization?.split(' ')[1];  // retrieves authorization header from incoming request ? for undefined authorization headers -1 extracts the jwtoken 
+  if (token) { // if token is extracted successfully
+    jwt.verify(token, SECRET_KEY, (err, user) => {  // jwt.verify will be called to verfiy the token , if it was valid userinfo is passed 
       if (err) {
         console.error('Invalid token:', err);
         return res.sendStatus(403); // Invalid token
       }
       console.log('Authenticated user:', user);
-      req.user = user;
+      req.user = user; // we attache the user info to the user request 
       next();
     });
   } else {
