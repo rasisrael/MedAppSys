@@ -54,8 +54,8 @@ const authenticateJWT = (req, res, next) => {
     res.sendStatus(401); // No token provided
   }
  };
-// User Registration
-// User Registration
+
+ // User Registration
 app.post('/register', async (req, res) => {
   const { username, password, role } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -72,31 +72,93 @@ app.post('/register', async (req, res) => {
   });
 });
 
+
+
 // User Login
+
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
   const query = 'SELECT * FROM users WHERE username = ?';
   connection.query(query, [username], async (err, results) => {
-      if (err) {
-          console.error('Error fetching user:', err);
-          res.status(500).json({ error: 'Database error' });
-          return;
-      }
-      if (results.length > 0) {
-          const user = results[0];
-          const isValidPassword = await bcrypt.compare(password, user.password);
-          if (isValidPassword) {
-              const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, SECRET_KEY, { expiresIn: '1h' });
-              req.session.user = { username: user.username, role: user.role };
-              res.json({ token });
-          } else {
-              res.status(401).json({ error: 'Invalid password' });
-          }
+    if (err) {
+      console.error('Error fetching user:', err);
+      res.status(500).json({ error: 'Database error' });
+      return;
+    }
+    if (results.length > 0) {
+      const user = results[0];
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      if (isValidPassword) {
+        const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, SECRET_KEY, { expiresIn: '1h' });
+        req.session.user = { username: user.username, role: user.role };
+        res.json({ token, username: user.username, role: user.role });
       } else {
-          res.status(401).json({ error: 'User not found' });
+        res.status(401).json({ error: 'Invalid password' });
       }
+    } else {
+      res.status(401).json({ error: 'User not found' });
+    }
   });
-});
+ });
+
+// Notify users of appointment changes
+const notifyUsers = (appointment, changeType) => {
+  console.log(`Notification: Appointment ${changeType} -`, appointment);
+ };
+ // Reminder system
+ const sendReminders = () => {
+  const query = 'SELECT * FROM appointments WHERE rowDate = CURDATE() + INTERVAL 1 DAY';
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching appointments for reminders:', err);
+      return;
+    }
+    results.forEach(appointment => {
+      console.log(`Reminder: Appointment tomorrow -`, appointment);
+    });
+  });
+ };
+ // Schedule reminders to run daily at midnight
+ const scheduleReminders = () => {
+  const now = new Date();
+  const millisTillMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0) - now;
+  setTimeout(() => {
+    sendReminders();
+    setInterval(sendReminders, 24 * 60 * 60 * 1000); // Repeat daily
+  }, millisTillMidnight);
+ };
+ scheduleReminders();
+
+
+
+
+
+
+
+// app.post('/login', (req, res) => {
+//   const { username, password } = req.body;
+//   const query = 'SELECT * FROM users WHERE username = ?';
+//   connection.query(query, [username], async (err, results) => {
+//       if (err) {
+//           console.error('Error fetching user:', err);
+//           res.status(500).json({ error: 'Database error' });
+//           return;
+//       }
+//       if (results.length > 0) {
+//           const user = results[0];
+//           const isValidPassword = await bcrypt.compare(password, user.password);
+//           if (isValidPassword) {
+//               const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, SECRET_KEY, { expiresIn: '1h' });
+//               req.session.user = { username: user.username, role: user.role };
+//               res.json({ token });
+//           } else {
+//               res.status(401).json({ error: 'Invalid password' });
+//           }
+//       } else {
+//           res.status(401).json({ error: 'User not found' });
+//       }
+//   });
+// });
 
 // Get all appointments for the logged-in user
 app.get('/appointments', authenticateJWT, (req, res) => {
@@ -134,6 +196,9 @@ app.post('/appointments', authenticateJWT, (req, res) => {
           return;
       }
       const newEvent = { id: results.insertId, rowDescription, rowDoctor, rowDate, rowTime, rowPatient };
+      //   notifying
+      notifyUsers(newEvent, 'added');
+
       res.status(201).json(newEvent);
   });
 });
@@ -148,7 +213,9 @@ connection.query('DELETE FROM appointments WHERE id = ?', [id], (err, results) =
    console.error('Error deleting appointment:', err);
    res.status(500).json({ error: 'Database error' });
     return;
-  } res.status(204).end();
+  }    notifyUsers({ id }, 'deleted');
+
+  res.status(204).end();
 });
 });
 // Update an appointment
@@ -162,9 +229,12 @@ connection.query(query, values, (err, results) => {
    console.error('Error updating appointment:', err);
    res.status(500).json({ error: 'Database error' });
     return;
-  } res.json({ id, rowDescription, rowDoctor, rowDate, rowTime, rowPatient });
+  } 
+  
+  res.json({ id, rowDescription, rowDoctor, rowDate, rowTime, rowPatient });
 });
 });
+
 // Logout
 app.post('/logout', (req, res) => {
 req.session.destroy();

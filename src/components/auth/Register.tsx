@@ -18,6 +18,8 @@ const Register: React.FC = () => {
        if (response.ok) {
            const data = await response.json();
            console.log("Successful Registration", data);
+           //added
+           localStorage.setItem('user', JSON.stringify({ username: data.username, role: data.role }));
            navigate('/login');
        } else {
            console.error('Registration failed');
@@ -61,7 +63,6 @@ const Register: React.FC = () => {
 export default Register;
 
 
-// import React, { useState } from 'react';
 // import { useNavigate } from 'react-router-dom';
 // import Form from 'react-bootstrap/Form';
 // import Button from 'react-bootstrap/Button';

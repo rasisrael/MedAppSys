@@ -25,10 +25,12 @@ const Home: React.FC = () => {
         }
         const data: AppModel[] = await response.json();
         setAppointments(data);
+        // notifyUser("Fetched all appointments successfully");
     } catch (error) {
         console.error('Error fetching appointments:', error);
+        // notifyUser("Error fetching appointments");
     }
- };
+ };const notifyUser = (message:string) =>{alert(message)};
   // const fetchAppointments = async () => {
   //   try {
   //     const token = localStorage.getItem('token');
@@ -76,8 +78,13 @@ const Home: React.FC = () => {
       });
       const newAppointment: AppModel = await response.json();
       setAppointments((appointments) => [...appointments, newAppointment]);
+
+      //added
+      // notifyUser("Appointment added successfully");
     } catch (error) {
       console.error('Error adding appointment:', error);
+      // notifyUser("error adding appoinntment");
+
     }
   };
   const deleteApp = async (deleteAppRowId: number) => {
@@ -89,12 +96,16 @@ const Home: React.FC = () => {
           Authorization: `Bearer ${token}`,
 
           // Authorization: token ? token : '',
+
         },
       });
       setAppointments(appointments.filter((appointment) => appointment.id !==
         deleteAppRowId));
+        // notifyUser("Appointment Deleted successfully")
     } catch (error) {
       console.error('Error deleting appointment:', error);
+      // notifyUser("Error Deleting...")
+
     }
   };
   const updateApp = async (id: number, updatedApp: Partial<AppModel>) => {
@@ -112,8 +123,12 @@ const Home: React.FC = () => {
       const updatedAppointment: AppModel = await response.json();
       setAppointments(appointments.map((app) => (app.id === id ? updatedAppointment :
         app)));
+        // notifyUser("Appointment  updated successfully")
+
     } catch (error) {
       console.error('Error updating appointment:', error);
+      // notifyUser("Appointment  could not be updated")
+
     }
   };
   /////
