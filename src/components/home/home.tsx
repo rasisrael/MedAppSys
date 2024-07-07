@@ -14,7 +14,9 @@ const Home: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:3000/appointments', {
+        credentials: 'include',
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
 
           // Authorization: token ? token : '',
@@ -36,9 +38,13 @@ const Home: React.FC = () => {
       const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:3000/appointments', {
         method: 'POST',
+        credentials: 'include',
+
         headers: {
           'Content-Type': 'application/json',
-          Authorization: token ? token : '',
+          Authorization: `Bearer ${token}`,
+
+          // Authorization: token ? token : '',
         },
         body: JSON.stringify({
           rowDescription: description,
@@ -47,6 +53,7 @@ const Home: React.FC = () => {
           rowTime: time,
           rowPatient: patient,
         }),
+
       });
       const newAppointment: AppModel = await response.json();
       setAppointments((appointments) => [...appointments, newAppointment]);
@@ -60,7 +67,9 @@ const Home: React.FC = () => {
       await fetch(`http://localhost:3000/appointments/${deleteAppRowId}`, {
         method: 'DELETE',
         headers: {
-          Authorization: token ? token : '',
+          Authorization: `Bearer ${token}`,
+
+          // Authorization: token ? token : '',
         },
       });
       setAppointments(appointments.filter((appointment) => appointment.id !==
@@ -76,7 +85,8 @@ const Home: React.FC = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: token ? token : '',
+          Authorization: `Bearer ${token}`,
+
         },
         body: JSON.stringify(updatedApp),
       });
