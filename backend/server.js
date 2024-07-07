@@ -103,29 +103,29 @@ app.post('/login', (req, res) => {
 
 // Notify users of appointment changes
 const notifyUsers = (appointment, changeType) => {
-  console.log(`Notification: Appointment ${changeType} -`, appointment);
+  console.log(`Notification: Appointment ${changeType} -`, appointment);//The message includes the type of change (`changeType`) and the appointment details (`appointment`).
  };
  // Reminder system
  const sendReminders = () => {
-  const query = 'SELECT * FROM appointments WHERE rowDate = CURDATE() + INTERVAL 1 DAY';
+  const query = 'SELECT * FROM appointments WHERE rowDate = CURDATE() + INTERVAL 1 DAY';// SQL query that selects all appointments scheduled for the next day. `CURDATE()` returns the current date, and `+ INTERVAL 1 DAY` adds one day to it.
   connection.query(query, (err, results) => {
     if (err) {
       console.error('Error fetching appointments for reminders:', err);
       return;
     }
     results.forEach(appointment => {
-      console.log(`Reminder: Appointment tomorrow -`, appointment);
+      console.log(`Reminder: Appointment tomorrow -`, appointment);//If there is no error, this block iterates over the `results` array (which contains the appointments) using `forEach`.
     });
   });
  };
  // Schedule reminders to run daily at midnight
  const scheduleReminders = () => {
-  const now = new Date();
-  const millisTillMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0) - now;
+  const now = new Date(); //`Date` object representing the current date and time and assigns it to the variable `now`
+  const millisTillMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0) - now;//This line calculates the number of milliseconds until midnight.
   setTimeout(() => {
     sendReminders();
     setInterval(sendReminders, 24 * 60 * 60 * 1000); // Repeat daily
-  }, millisTillMidnight);
+  }, millisTillMidnight); //sendReminders` every 24 hours (24 * 60 * 60 * 1000 milliseconds), ensuring that reminders are sent daily at midnight.
  };
  scheduleReminders();
 
