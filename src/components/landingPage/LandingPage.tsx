@@ -22,7 +22,7 @@ const LandingPage: React.FC = () => {
                         </Link>
                     </Col>
                     <Col md={6}>
-                        <img src="../../assets/images/home_image.jpg" alt="Doctor with patient" className="img-fluid" />
+                        <img src="../../../public/images/home_image.jpg" alt="Doctor with patient" className="img-fluid" />
                     </Col>
                 </Row>
             </Container>
