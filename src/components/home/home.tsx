@@ -4,6 +4,7 @@ import AppTable from '../appointments/AppTable';
 import NewAppForm from '../appointments/NewAppForm';
 import { AppModel } from '../../models/AppModel';
 import './home.css';
+import NotificationList from '../Notification';
 const Home: React.FC = () => {
   const [showAppForm, setShowAppForm] = useState(false);
   const [appointments, setAppointments] = useState<AppModel[]>([]);
@@ -137,7 +138,8 @@ const Home: React.FC = () => {
   }, []);
   /////
   return (
-    <div>
+    <div>          <NotificationList />
+
       <div className="p-5 mb-4 bg-body-tertiary rounded-3">
         <div className="container-fluid py-5">
           <AppTable appointments={appointments} deleteApp={deleteApp}

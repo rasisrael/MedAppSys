@@ -230,11 +230,39 @@ connection.query(query, values, (err, results) => {
    res.status(500).json({ error: 'Database error' });
     return;
   } 
+        // Insert a notification for the doctor
+        const notificationQuery = 'INSERT INTO notifications (doctor_username, message) VALUES (?, ?)';
+        const message = `Appointment number: ${id}, with patient: ${rowPatient} has been changed`;
+        connection.query(notificationQuery, [rowDoctor, message], (err, results) => {
+            if (err) {
+                console.error('Error adding notification:', err);
+                res.status(500).json({ error: 'Database error' });
+                return;
+            }
+            res.json({ id, rowDescription, rowDoctor, rowDate, rowTime, rowPatient });
+        });
+    });
+});
   
-  res.json({ id, rowDescription, rowDoctor, rowDate, rowTime, rowPatient });
+//   res.json({ id, rowDescription, rowDoctor, rowDate, rowTime, rowPatient });
+// });
+// });
+// Get notifications for the logged-in user
+app.get('/notifications', authenticateJWT, (req, res) => {
+  const { username, role } = req.user;
+  if (role !== 'doctor') {
+      return res.status(403).json({ error: 'Only doctors can view notifications' });
+  }
+  const query = 'SELECT * FROM notifications WHERE doctor_username = ? AND is_read = FALSE';
+  connection.query(query, [username], (err, results) => {
+      if (err) {
+          console.error('Error fetching notifications:', err);
+          res.status(500).json({ error: 'Database error' });
+          return;
+      }
+      res.json(results);
+  });
 });
-});
-
 // Logout
 app.post('/logout', (req, res) => {
 req.session.destroy();
