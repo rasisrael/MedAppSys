@@ -1,0 +1,15 @@
+
+.main-content {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.table-section {
+    flex: 2;
+}
+
+.notification-section {
+    flex: 1;
+    margin-left: 20px;
+}

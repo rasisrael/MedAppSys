@@ -1,0 +1,19 @@
+.landing-page {
+    padding: 60px 0;
+    background-color: #f8f9fa;
+}
+
+.landing-page h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+.landing-page p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+}
+
+.landing-page .img-fluid {
+    max-width: 100%;
+    height: auto;
+}
