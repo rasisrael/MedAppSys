@@ -1,9 +1,9 @@
-const express = require('express');
+const express = require('express'); // frameword
 const bodyParser = require('body-parser');
-const cors = require('cors');
+const cors = require('cors'); // to share resources
 const mysql = require('mysql2');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt'); // to hash and verify password 
+const jwt = require('jsonwebtoken'); // for authentication and authortization 
 const session = require('express-session');
 const dotenv = require('dotenv');
 // Load environment variables from .env file
@@ -58,7 +58,7 @@ const authenticateJWT = (req, res, next) => {
  // User Registration
 app.post('/register', async (req, res) => {
   const { username, password, role } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await bcrypt.hash(password, 10); // hashes password- 10 is salt round showing how many times password will be hashed
   const query = 'INSERT INTO users (username, password, role) VALUES (?, ?, ?)';
   connection.query(query, [username, hashedPassword, role], (err, results) => {
       if (err) {
@@ -66,8 +66,8 @@ app.post('/register', async (req, res) => {
           res.status(500).json({ error: 'Database error' });
           return;
       }
-      const userId = results.insertId;
-      const token = jwt.sign({ id: userId, username, role }, SECRET_KEY, { expiresIn: '1h' });
+      const userId = results.insertId; // extracting id of the newly inserted user to the users table
+      const token = jwt.sign({ id: userId, username, role }, SECRET_KEY, { expiresIn: '1h' }); // generating json web token
       res.status(201).json({ message: 'User registered successfully' });
   });
 });
@@ -79,19 +79,19 @@ app.post('/register', async (req, res) => {
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
   const query = 'SELECT * FROM users WHERE username = ?';
-  connection.query(query, [username], async (err, results) => {
+  connection.query(query, [username], async (err, results) => {   // executing the sql query 
     if (err) {
       console.error('Error fetching user:', err);
       res.status(500).json({ error: 'Database error' });
       return;
     }
-    if (results.length > 0) {
-      const user = results[0];
+    if (results.length > 0) { // if result array contains at least oneuser
+      const user = results[0]; // the first user will be extracted 
       const isValidPassword = await bcrypt.compare(password, user.password);
-      if (isValidPassword) {
-        const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, SECRET_KEY, { expiresIn: '1h' });
-        req.session.user = { username: user.username, role: user.role };
-        res.json({ token, username: user.username, role: user.role });
+      if (isValidPassword) {  // password will be checked if this is true meaning that the password is correct 
+        const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, SECRET_KEY, { expiresIn: '1h' }); // using jwt.sign method json wb token will be generated -secret key is used to sign the token
+        req.session.user = { username: user.username, role: user.role };// storing users info in a session 
+        res.json({ token, username: user.username, role: user.role }); // returning back the json response to the user 
       } else {
         res.status(401).json({ error: 'Invalid password' });
       }
