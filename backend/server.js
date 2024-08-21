@@ -25,7 +25,7 @@ saveUninitialized: true,
 const connection = mysql.createConnection({
 host: 'localhost', // Replace with your host
 user: 'root', // Replace with your MySQL username
-password: 'Hom@3368189', // Replace with your MySQL password
+password: 'password', // Replace with your MySQL password
 database: 'node_db3' // Replace with your database name
 });
 // Connect to the database
